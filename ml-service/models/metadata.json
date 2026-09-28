@@ -1,0 +1,125 @@
+{
+  "demand_metrics": {
+    "method": "rolling-origin back-test, 13 origins, 4-week horizon",
+    "per_crop": {
+      "Maize": {
+        "mape": 0.0869,
+        "naive_mape": 0.1104,
+        "seasonal_naive_mape": 0.1106,
+        "weeks": 168,
+        "models_selected": {
+          "moving_average": 1,
+          "holt_winters_seasonal": 9,
+          "holt_linear_trend": 3
+        }
+      },
+      "Beans": {
+        "mape": 0.0943,
+        "naive_mape": 0.0993,
+        "seasonal_naive_mape": 0.0959,
+        "weeks": 168,
+        "models_selected": {
+          "moving_average": 2,
+          "holt_winters_seasonal": 9,
+          "holt_linear_trend": 2
+        }
+      },
+      "Irish Potatoes": {
+        "mape": 0.094,
+        "naive_mape": 0.1184,
+        "seasonal_naive_mape": 0.114,
+        "weeks": 168,
+        "models_selected": {
+          "moving_average": 1,
+          "holt_winters_seasonal": 9,
+          "holt_linear_trend": 3
+        }
+      },
+      "Tomatoes": {
+        "mape": 0.1222,
+        "naive_mape": 0.1294,
+        "seasonal_naive_mape": 0.1053,
+        "weeks": 168,
+        "models_selected": {
+          "holt_winters_seasonal": 10,
+          "holt_linear_trend": 3
+        }
+      },
+      "Onions": {
+        "mape": 0.0793,
+        "naive_mape": 0.0945,
+        "seasonal_naive_mape": 0.0774,
+        "weeks": 168,
+        "models_selected": {
+          "holt_winters_seasonal": 13
+        }
+      },
+      "Cabbages": {
+        "mape": 0.0942,
+        "naive_mape": 0.1266,
+        "seasonal_naive_mape": 0.1102,
+        "weeks": 168,
+        "models_selected": {
+          "holt_winters_seasonal": 10,
+          "holt_linear_trend": 3
+        }
+      },
+      "Sukuma Wiki": {
+        "mape": 0.0886,
+        "naive_mape": 0.0937,
+        "seasonal_naive_mape": 0.1041,
+        "weeks": 168,
+        "models_selected": {
+          "moving_average": 2,
+          "holt_winters_seasonal": 8,
+          "holt_linear_trend": 3
+        }
+      },
+      "Bananas": {
+        "mape": 0.0909,
+        "naive_mape": 0.1095,
+        "seasonal_naive_mape": 0.1006,
+        "weeks": 168,
+        "models_selected": {
+          "moving_average": 2,
+          "holt_winters_seasonal": 8,
+          "holt_linear_trend": 3
+        }
+      },
+      "Avocados": {
+        "mape": 0.0958,
+        "naive_mape": 0.1296,
+        "seasonal_naive_mape": 0.0998,
+        "weeks": 168,
+        "models_selected": {
+          "moving_average": 1,
+          "holt_winters_seasonal": 9,
+          "holt_linear_trend": 3
+        }
+      },
+      "Green Grams": {
+        "mape": 0.0776,
+        "naive_mape": 0.0903,
+        "seasonal_naive_mape": 0.0922,
+        "weeks": 168,
+        "models_selected": {
+          "moving_average": 3,
+          "holt_winters_seasonal": 5,
+          "holt_linear_trend": 5
+        }
+      }
+    },
+    "mean_mape": 0.0924,
+    "mean_naive_mape": 0.1102,
+    "mean_seasonal_naive_mape": 0.101,
+    "improvement_over_naive_pct": 16.2
+  },
+  "last_training": {
+    "at": "2026-09-23T16:35:07.681330+00:00",
+    "source": "bundled_simulated_dataset",
+    "price_records": 31100,
+    "transactions": 5925,
+    "seconds": 128.7,
+    "model_version": "price-reg-gradient_boosting-202609231633"
+  }
+}

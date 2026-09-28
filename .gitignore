@@ -1,0 +1,23 @@
+# Dependencies and build output
+node_modules/
+frontend/dist/
+frontend/.angular/
+backend/target/
+backend/.mvn/apache-maven-*/
+
+# Python
+__pycache__/
+.pytest_cache/
+*.pyc
+.venv/
+venv/
+
+# Secrets and local config
+.env
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log

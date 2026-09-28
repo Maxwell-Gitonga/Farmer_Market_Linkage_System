@@ -1,0 +1,31 @@
+ref,name,phone,email,location
+1,Maxwell Demo Farmer,0711000001,farmer1@fmls.demo,Nakuru
+2,Kiprotich Kiptoo,0711000002,farmer2@fmls.demo,Kiambu
+3,Adhiambo Kariuki,0711000003,farmer3@fmls.demo,Nakuru
+4,Achieng Nyaga,0711000004,farmer4@fmls.demo,Uasin Gishu
+5,Jeruto Kosgei,0711000005,farmer5@fmls.demo,Trans Nzoia
+6,Kipchumba Oduor,0711000006,farmer6@fmls.demo,Meru
+7,Wambui Kibet,0711000007,farmer7@fmls.demo,Nyeri
+8,Muthoni Muriuki,0711000008,farmer8@fmls.demo,Machakos
+9,Gitau Kiptoo,0711000009,farmer9@fmls.demo,Kisumu
+10,Wanjiru Owino,0711000010,farmer10@fmls.demo,Mombasa
+11,Kipchumba Odhiambo,0711000011,farmer11@fmls.demo,Nairobi
+12,Wanjiru Makori,0711000012,farmer12@fmls.demo,Kiambu
+13,Kiprotich Mutiso,0711000013,farmer13@fmls.demo,Nakuru
+14,Mutua Odhiambo,0711000014,farmer14@fmls.demo,Uasin Gishu
+15,Achieng Muriuki,0711000015,farmer15@fmls.demo,Trans Nzoia
+16,Ochieng Oduor,0711000016,farmer16@fmls.demo,Meru
+17,Mutua Nyaga,0711000017,farmer17@fmls.demo,Nyeri
+18,Nekesa Owino,0711000018,farmer18@fmls.demo,Machakos
+19,Jeruto Wairimu,0711000019,farmer19@fmls.demo,Kisumu
+20,Barasa Ruto,0711000020,farmer20@fmls.demo,Mombasa
+21,Kamau Nyaga,0711000021,farmer21@fmls.demo,Nairobi
+22,Moraa Njoroge,0711000022,farmer22@fmls.demo,Kiambu
+23,Mwangi Ruto,0711000023,farmer23@fmls.demo,Nakuru
+24,Jeruto Cheruiyot,0711000024,farmer24@fmls.demo,Uasin Gishu
+25,Atieno Kariuki,0711000025,farmer25@fmls.demo,Trans Nzoia
+26,Muthoni Owino,0711000026,farmer26@fmls.demo,Meru
+27,Barasa Maina,0711000027,farmer27@fmls.demo,Nyeri
+28,Jepkosgei Kariuki,0711000028,farmer28@fmls.demo,Machakos
+29,Kipchumba Kariuki,0711000029,farmer29@fmls.demo,Kisumu
+30,Atieno Langat,0711000030,farmer30@fmls.demo,Mombasa

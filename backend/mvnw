@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Maven wrapper: uses an installed "mvn" if available, otherwise downloads Apache Maven into .mvn/
+set -e
+MAVEN_VERSION=3.9.9
+BASEDIR="$(cd "$(dirname "$0")" && pwd)"
+if command -v mvn >/dev/null 2>&1; then exec mvn -f "$BASEDIR/pom.xml" "$@"; fi
+LOCAL="$BASEDIR/.mvn/apache-maven-$MAVEN_VERSION/bin/mvn"
+if [ ! -x "$LOCAL" ]; then
+  echo "Maven not found - downloading Apache Maven $MAVEN_VERSION (one time only)..."
+  mkdir -p "$BASEDIR/.mvn"
+  curl -fsSL "https://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz" | tar -xz -C "$BASEDIR/.mvn"
+fi
+exec "$LOCAL" -f "$BASEDIR/pom.xml" "$@"
