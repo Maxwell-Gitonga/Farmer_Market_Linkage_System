@@ -29,7 +29,7 @@ import { ToastService } from '../../core/toast.service';
             <div class="card"><div class="stat-label">Selected price model</div><div class="stat-value small">{{ pm.selected_model?.replaceAll('_', ' ') }}</div><div class="stat-sub">{{ pm.version }}</div></div>
             <div class="card"><div class="stat-label">Price MAPE (hold-out)</div><div class="stat-value">{{ pct(pm.comparison?.[pm.selected_model]?.mape) }}</div><div class="stat-sub">naive {{ pct(pm.comparison?.naive_last_price_baseline?.mape) }} · {{ pm.improvement_over_naive_pct }}% better</div></div>
             <div class="card"><div class="stat-label">Price R²</div><div class="stat-value">{{ pm.comparison?.[pm.selected_model]?.r2 }}</div><div class="stat-sub">MAE KES {{ pm.comparison?.[pm.selected_model]?.mae }}/kg</div></div>
-            <div class="card"><div class="stat-label">Demand MAPE</div><div class="stat-value">{{ pct(dm()?.mean_mape) }}</div><div class="stat-sub">naive {{ pct(dm()?.mean_naive_mape) }} · seasonal-naive {{ pct(dm()?.mean_seasonal_naive_mape) }}</div></div>
+            <div class="card"><div class="stat-label">Demand error ({{ dm()?.metric || 'MAPE' }})</div><div class="stat-value">{{ pct(dm()?.mean_mape) }}</div><div class="stat-sub">naive {{ pct(dm()?.mean_naive_mape) }} · seasonal-naive {{ pct(dm()?.mean_seasonal_naive_mape) }}</div></div>
           </div>
 
           <div class="section-title">Price model comparison <small class="muted">(time-based hold-out: last {{ pm.holdout_days }} days, {{ pm.test_samples }} test samples)</small></div>
@@ -51,13 +51,18 @@ import { ToastService } from '../../core/toast.service';
             <div>
               <div class="section-title">Demand forecast accuracy by crop <small class="muted">({{ dm()?.method }})</small></div>
               <div class="table-wrap"><table>
-                <thead><tr><th>Crop</th><th class="num">Model</th><th class="num">Naive</th><th class="num">Seasonal naive</th></tr></thead>
+                <thead><tr><th>Crop</th><th class="num">Model {{ dm()?.metric || 'MAPE' }}</th><th class="num">Naive</th><th class="num">Seasonal naive</th></tr></thead>
                 <tbody>@for (e of entries(dm()?.per_crop); track e[0]) { <tr><td>{{ e[0] }}</td><td class="num">{{ pct(e[1].mape) }}</td><td class="num">{{ pct(e[1].naive_mape) }}</td><td class="num">{{ pct(e[1].seasonal_naive_mape) }}</td></tr> }</tbody>
               </table></div>
             </div>
           </div>
           <p class="muted mt">Trained on {{ s.metrics?.last_training?.price_records }} market prices and {{ s.metrics?.last_training?.transactions }} transactions
             ({{ s.metrics?.data_source?.replaceAll('_', ' ') }}) at {{ s.metrics?.last_training?.at }}. Models are retrained automatically every Sunday at 02:00.</p>
+          @if (dm()?.metric === 'WAPE') {
+            <p class="muted">Demand error is WAPE: the total forecast error over each 4-week window divided by the total
+              kilograms actually sold in it. Weeks with almost no recorded sales are treated as missing data, so a quiet
+              week cannot inflate the score.</p>
+          }
         }
       } @else if (!error()) { <div class="card"><div class="skeleton big"></div></div> }
     </div>

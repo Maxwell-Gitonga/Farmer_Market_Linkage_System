@@ -6,7 +6,7 @@ import { errorMessage } from '../../core/auth.interceptor';
 import { AuthService } from '../../core/auth.service';
 import { MetaView, Role } from '../../core/models';
 
-/** Wireframe "Login screen": Login | Register tabs, Farmer | Buyer choice, phone number, password. */
+/** Login screen: one sign-in for everyone (the role comes from the account). The Farmer | Buyer choice appears only when registering. */
 @Component({
   selector: 'app-login',
   imports: [FormsModule],
@@ -22,10 +22,12 @@ import { MetaView, Role } from '../../core/models';
           <button type="button" [class.on]="mode() === 'register'" (click)="mode.set('register'); error.set('')">Register</button>
         </div>
 
-        <div class="choice mt">
-          <button type="button" [class.on]="role() === 'FARMER'" (click)="role.set('FARMER')">Farmer</button>
-          <button type="button" [class.on]="role() === 'BUYER'" (click)="role.set('BUYER')">Buyer</button>
-        </div>
+        @if (mode() === 'register') {
+          <div class="choice mt">
+            <button type="button" [class.on]="role() === 'FARMER'" (click)="role.set('FARMER')">Farmer</button>
+            <button type="button" [class.on]="role() === 'BUYER'" (click)="role.set('BUYER')">Buyer</button>
+          </div>
+        }
 
         <form class="stack mt" (ngSubmit)="submit()" #f="ngForm">
           @if (mode() === 'register') {
@@ -145,7 +147,8 @@ export class LoginPage {
       error: (e: any) => { this.busy.set(false); this.error.set(errorMessage(e)); }
     };
     if (this.mode() === 'login') {
-      this.auth.login(this.phone.trim(), this.password, this.role()).subscribe(done);
+      // No role is sent: the backend works out who is logging in from the phone number or email.
+      this.auth.login(this.phone.trim(), this.password).subscribe(done);
     } else {
       this.auth.register({
         role: this.role(), name: this.name.trim(), phone: this.phone.trim(), password: this.password,

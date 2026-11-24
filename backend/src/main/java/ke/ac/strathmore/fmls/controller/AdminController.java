@@ -7,6 +7,7 @@ import ke.ac.strathmore.fmls.domain.ProductStatus;
 import ke.ac.strathmore.fmls.domain.Role;
 import ke.ac.strathmore.fmls.dto.AdminOverview;
 import ke.ac.strathmore.fmls.dto.AdminUserView;
+import ke.ac.strathmore.fmls.dto.CreateAdminRequest;
 import ke.ac.strathmore.fmls.dto.ImportResult;
 import ke.ac.strathmore.fmls.dto.LogView;
 import ke.ac.strathmore.fmls.dto.MarketPriceRequest;
@@ -75,6 +76,12 @@ public class AdminController {
         return admin.setStatus(role, id, req.status(), req.reason());
     }
 
+    /** "Add administrator" on the Users page. */
+    @PostMapping("/admins")
+    public AdminUserView createAdmin(@Valid @RequestBody CreateAdminRequest req) {
+        return admin.createAdmin(req);
+    }
+
     @PostMapping("/farmers/{id}/approve")
     public AdminUserView approve(@PathVariable Long id) {
         return admin.setStatus(Role.FARMER, id, AccountStatus.ACTIVE, "approved");
@@ -103,7 +110,7 @@ public class AdminController {
     @GetMapping("/reports/export")
     public ResponseEntity<byte[]> export(@RequestParam String type, @RequestParam(defaultValue = "90") int days) {
         String csv = admin.exportCsv(type, days);
-        String name = "fmls-" + type + "-" + LocalDate.now() + ".csv";
+        String name = "fmls" + type + "-" + LocalDate.now() + ".csv";
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
                 .contentType(MediaType.parseMediaType("text/csv"))

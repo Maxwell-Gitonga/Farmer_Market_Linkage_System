@@ -44,10 +44,12 @@ public class GlobalExceptionHandler {
         return body(HttpStatus.BAD_REQUEST, "Invalid request: " + e.getMessage());
     }
 
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleConflict(DataIntegrityViolationException e) {
         return body(HttpStatus.CONFLICT, "This record conflicts with existing data (e.g. the phone number or email is already registered).");
     }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleOther(Exception e) {

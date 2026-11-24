@@ -100,6 +100,9 @@ export class ApiService {
   setUserStatus(role: Role, id: number, status: AccountStatus, reason?: string) {
     return this.http.patch<AdminUserView>(`${this.base}/admin/users/${role}/${id}/status`, { status, reason });
   }
+  createAdmin(body: { name: string; email: string; phone?: string | null; password: string; location?: string | null }) {
+    return this.http.post<AdminUserView>(`${this.base}/admin/admins`, body);
+  }
   adminListings(status?: ProductStatus | '') {
     return this.http.get<ProductView[]>(`${this.base}/admin/listings`, { params: this.params({ status }) });
   }

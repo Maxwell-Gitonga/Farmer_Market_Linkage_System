@@ -14,7 +14,7 @@ import { KesPipe, NumPipe, downloadBlob } from '../../shared/format';
   template: `
     <div class="page">
       <div class="page-head">
-        <div><h1>Reports</h1><div class="sub">{{ r()?.period }}</div></div>
+        <div><h1>Reports</h1><div class="sub">{{ periodLabel(true) }}</div></div>
         <div class="row">
           <select [(ngModel)]="days" (ngModelChange)="load()">
             <option [ngValue]="30">Last 30 days</option><option [ngValue]="90">Last 90 days</option>
@@ -29,15 +29,15 @@ import { KesPipe, NumPipe, downloadBlob } from '../../shared/format';
       @if (r(); as r) {
         <div class="grid-2">
           <div class="card">
-            <h3>Monthly trade value (KES)</h3>
-            <app-line-chart [series]="monthly()" ariaLabel="Monthly trade value" />
+            <h3>Monthly trade value (KES) <small class="muted">· {{ periodLabel() }}</small></h3>
+            <app-line-chart [series]="monthly()" xUnit="month" ariaLabel="Monthly trade value" />
           </div>
           <div class="card">
-            <h3>Trade value by crop</h3>
+            <h3>Trade value by crop <small class="muted">({{ periodLabel() }})</small></h3>
             <app-bar-chart [bars]="cropBars()" [height]="120" highlight="max" unit="KES " [showLabels]="true" />
           </div>
         </div>
-        <div class="section-title">By crop</div>
+        <div class="section-title">By crop <small class="muted">({{ periodLabel() }})</small></div>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Crop</th><th class="num">Transactions</th><th class="num">Quantity (kg)</th><th class="num">Value</th><th class="num">Avg price/kg</th></tr></thead>
@@ -63,7 +63,7 @@ import { KesPipe, NumPipe, downloadBlob } from '../../shared/format';
             <p class="muted">Price model: <strong>{{ r.modelMetrics.price_model.selected_model }}</strong> – MAPE
               {{ pct(r.modelMetrics.price_model.comparison?.[r.modelMetrics.price_model.selected_model]?.mape) }}
               vs naive baseline {{ pct(r.modelMetrics.price_model.comparison?.naive_last_price_baseline?.mape) }}.
-              Demand forecast MAPE {{ pct(r.modelMetrics.demand_model?.mean_mape) }} vs naive {{ pct(r.modelMetrics.demand_model?.mean_naive_mape) }}.</p>
+              Demand forecast {{ r.modelMetrics.demand_model?.metric || 'MAPE' }} {{ pct(r.modelMetrics.demand_model?.mean_mape) }} vs naive {{ pct(r.modelMetrics.demand_model?.mean_naive_mape) }}.</p>
           </div>
         }
       } @else if (!error()) { <div class="card"><div class="skeleton big"></div></div> }
@@ -78,11 +78,16 @@ export class AdminReportsPage {
   days = 365;
 
   monthly = computed<LineSeries[]>(() => [{ name: 'Trade value', color: 'var(--accent)',
-    points: (this.r()?.monthly || []).map(m => ({ x: m.month + '-15', y: m.value })) }]);
+    points: (this.r()?.monthly || []).map(m => ({ x: m.month + '-01T00:00:00', y: m.value })) }]);
   cropBars = computed<Bar[]>(() => (this.r()?.byCrop || []).map(c => ({ label: c.cropType.split(' ')[0], value: c.value })));
 
   constructor() { this.load(); }
   load() { this.api.reports(this.days).subscribe({ next: r => this.r.set(r), error: e => this.error.set(errorMessage(e)) }); }
+  /** The period chosen in the dropdown, in words: every chart and table on the page uses it. */
+  periodLabel(capital = false) {
+    const t = this.days >= 1100 ? 'all time' : this.days === 365 ? 'last 12 months' : `last ${this.days} days`;
+    return capital ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+  }
   entries(o: Record<string, number>) { return Object.entries(o || {}); }
   pct(v: number | undefined) { return v === undefined || v === null ? '—' : (v * 100).toFixed(1) + '%'; }
   exp(type: string) {

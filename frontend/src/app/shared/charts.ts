@@ -70,6 +70,37 @@ export class BarChart {
 }
 
 export interface LinePoint { x: string; y: number; }
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September',
+  'October', 'November', 'December'];
+
+/**
+ * X-axis ticks for time charts: one tick on the 1st of every month in the range, labelled with the
+ * month name (Nov, Dec, Jan …), and the year on the first tick and on every January. Very long ranges
+ * show every 2nd/3rd month so labels never overlap. Ranges shorter than two months fall back to dates.
+ */
+export function monthTicks(x0: number, x1: number): { t: number; label: string }[] {
+  const slack = 86400000;                              // tolerate time-zone offsets around the 1st
+  const DAY = 86400000;
+  const ticks: { t: number; m: Date }[] = [];
+  const s = new Date(x0 - slack);
+  for (let d = new Date(s.getFullYear(), s.getMonth(), 1); +d <= x1 + 6 * 3600000;
+       d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
+    if (+d >= x0 - slack) ticks.push({ t: Math.min(Math.max(+d, x0), x1), m: d });
+  }
+  // Data that starts well into a month (e.g. 15 Sep) also gets that month's name at the left edge.
+  const first = new Date(x0);
+  if (!ticks.length || ticks[0].t - x0 > 10 * DAY) ticks.unshift({ t: x0, m: new Date(first.getFullYear(), first.getMonth(), 1) });
+  const step = Math.ceil(ticks.length / 13);          // at most ~13 labels across the chart
+  let lastYear = -1;
+  return ticks.filter((_, i) => i % step === 0).map(k => {
+    const y = k.m.getFullYear();
+    const label = MONTHS[k.m.getMonth()] + (y !== lastYear ? ' ' + y : '');
+    lastYear = y;
+    return { t: k.t, label };
+  });
+}
 export interface LineSeries { name: string; points: LinePoint[]; color?: string; dashed?: boolean; }
 export interface Band { x: string; lo: number; hi: number; }
 
@@ -124,6 +155,8 @@ export class LineChart {
   band = input<Band[]>([]);
   bandLabel = input('Prediction range');
   yPrefix = input('');
+  /** 'month' = each point is a whole month (tooltips say "November 2025"); 'day' = dated points. */
+  xUnit = input<'day' | 'month'>('day');
   ariaLabel = input('Line chart');
   readonly W = 640;
   readonly H = 230;
@@ -151,18 +184,26 @@ export class LineChart {
       const v = y0 + ((y1 - y0) * i) / 4;
       return { y: sy(v), label: fmt(v) };
     });
-    const nX = 5;
-    const xTicks = Array.from({ length: nX }, (_, i) => {
-      const t = x0 + ((x1 - x0) * i) / (nX - 1);
-      return { x: sx(t), label: new Date(t).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' }) };
-    });
+    // Month-name ticks (Nov, Dec, Jan …) for anything that spans two months or more; dates otherwise.
+    let xTicks = monthTicks(x0, x1).map(k => ({ x: sx(k.t), label: k.label }));
+    if (xTicks.length < 2) {
+      const nX = 5;
+      xTicks = Array.from({ length: nX }, (_, i) => {
+        const t = x0 + ((x1 - x0) * i) / (nX - 1);
+        return { x: sx(t), label: new Date(t).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' }) };
+      });
+    }
+    const pointLabel = (x: string) => {
+      const d = new Date(x);
+      return this.xUnit() === 'month' ? `${MONTHS_LONG[d.getMonth()]} ${d.getFullYear()}` : d.toLocaleDateString('en-KE');
+    };
     const palette = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)', 'var(--muted)'];
     const paths = series.map((s, i) => {
       const pts = [...s.points].sort((a, b) => +new Date(a.x) - +new Date(b.x));
       const d = pts.map((p, j) => `${j ? 'L' : 'M'}${sx(+new Date(p.x)).toFixed(1)},${sy(p.y).toFixed(1)}`).join(' ');
       const dots = pts.length <= 40 ? pts.map(p => ({
         x: sx(+new Date(p.x)), y: sy(p.y),
-        title: `${new Date(p.x).toLocaleDateString('en-KE')}: ${this.yPrefix()}${p.y.toLocaleString('en-KE', { maximumFractionDigits: 1 })}`
+        title: `${pointLabel(p.x)}: ${this.yPrefix()}${p.y.toLocaleString('en-KE', { maximumFractionDigits: 1 })}`
       })) : [];
       return { name: s.name, d, dots, color: s.color || palette[i % palette.length], dashed: !!s.dashed };
     });

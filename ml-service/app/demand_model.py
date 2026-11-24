@@ -17,8 +17,15 @@ compare the mean of the next 4 forecast weeks with the mean of the last 4 observ
 > +5 % RISING, < -5 % FALLING, otherwise STABLE.
 
 Evaluation: rolling-origin back-test over the last year (13 forecast origins, 4-week
-horizon); MAPE is compared against naive (last week) and seasonal-naive (same week last
-year) baselines.
+horizon) compared against naive (last week) and seasonal-naive (same week last year)
+baselines. The error measure is WAPE (weighted absolute percentage error): total absolute
+error over the 4 forecast weeks divided by total actual demand in those weeks. Plain MAPE
+divides by each week separately, add so one week with almost no recorded sales (e.g. 40 kg
+against a normal 9,000 kg) turns into an error of thousands of percent; WAPE does not.
+Weeks whose recorded demand is far below the crop's normal level (less than a quarter of
+the typical week) are treated as missing data, not as real demand, and left out of the score.
+(The result keys keep the historical names "mape", "naive_mape" … for API compatibility;
+"metric" says which measure they hold.)
 """
 from __future__ import annotations
 
@@ -31,6 +38,20 @@ from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 RISING, FALLING, STABLE = "RISING", "FALLING", "STABLE"
 TREND_THRESHOLD = 0.05
+METRIC = "WAPE"
+MIN_WINDOW_SHARE = 0.25   # a week below 25% of the typical weekly demand is treated as missing data
+
+
+def wape(forecast: np.ndarray, actual: np.ndarray) -> float:
+    """Weighted absolute percentage error: sum|forecast - actual| / sum(actual)."""
+    total = float(np.sum(actual))
+    return float(np.sum(np.abs(np.asarray(forecast) - np.asarray(actual))) / total) if total > 0 else float("nan")
+
+
+def typical_week(s: pd.Series) -> float:
+    """Median of the weeks that had sales: the crop's normal weekly demand."""
+    nz = s[s > 0]
+    return float(nz.median()) if len(nz) else 0.0
 
 
 def weekly_series(transactions: pd.DataFrame, crop: str, reference: date | None = None) -> pd.Series:
@@ -82,13 +103,14 @@ def select_method(s: pd.Series, val: int = 12) -> str:
     if len(s) < val + 12:
         return "moving_average" if len(s) < 12 else "holt_linear_trend"
     train, test = s.iloc[:-val], s.iloc[-val:].to_numpy()
-    mask = test > 0
     best, best_err = None, float("inf")
     for m in METHODS:
         fc, used = _fit_forecast(train, val, m)
         if used != m:
             continue
-        err = float(np.mean(np.abs(fc[mask] - test[mask]) / test[mask])) if mask.any() else 0.0
+        err = wape(fc, test)
+        if np.isnan(err):
+            err = 0.0
         if err < best_err:
             best, best_err = m, err
     return best or "moving_average"
@@ -134,28 +156,37 @@ def evaluate(transactions: pd.DataFrame, crops: list[str], horizon: int = 4, fol
         if len(s) < 52 + folds * 4 + horizon:
             continue
         errs, e_naive, e_snaive, used_models = [], [], [], []
+        skipped = 0
         for f in range(folds):
             origin = len(s) - horizon - 4 * (folds - 1 - f)
             train, test = s.iloc[:origin], s.iloc[origin:origin + horizon].to_numpy()
+            # Data-quality check: a week with far less recorded demand than normal means the sales
+            # records are missing (e.g. the demo data stops), not that buyers stopped buying.
+            # Such weeks are left out of the score; a window with fewer than 2 good weeks is skipped.
+            ok = test >= MIN_WINDOW_SHARE * typical_week(train)
+            if ok.sum() < 2:
+                skipped += 1
+                continue
             fc, model = _fit_forecast(train, horizon, select_method(train))
             naive = np.repeat(train.iloc[-1], horizon)
             snaive = s.iloc[origin - 52:origin - 52 + horizon].to_numpy()
-            mask = test > 0
-            if not mask.any():
-                continue
-            errs.append(np.mean(np.abs(fc[mask] - test[mask]) / test[mask]))
-            e_naive.append(np.mean(np.abs(naive[mask] - test[mask]) / test[mask]))
-            e_snaive.append(np.mean(np.abs(snaive[mask] - test[mask]) / test[mask]))
+            errs.append(wape(fc[ok], test[ok]))
+            e_naive.append(wape(naive[ok], test[ok]))
+            e_snaive.append(wape(snaive[ok], test[ok]))
             used_models.append(model)
+        if not errs:
+            continue
         per_crop[crop] = {"mape": round(float(np.mean(errs)), 4), "naive_mape": round(float(np.mean(e_naive)), 4),
                           "seasonal_naive_mape": round(float(np.mean(e_snaive)), 4), "weeks": int(len(s)),
+                          "folds_used": len(errs), "folds_skipped": skipped,
                           "models_selected": {m: used_models.count(m) for m in set(used_models)}}
         all_m += errs
         all_naive += e_naive
         all_snaive += e_snaive
     if not all_m:
-        return {"per_crop": {}, "mean_mape": None}
-    return {"method": f"rolling-origin back-test, {folds} origins, {horizon}-week horizon",
+        return {"per_crop": {}, "mean_mape": None, "metric": METRIC}
+    return {"method": f"rolling-origin back-test, {folds} origins, {horizon}-week horizon, WAPE",
+            "metric": METRIC,
             "per_crop": per_crop, "mean_mape": round(float(np.mean(all_m)), 4),
             "mean_naive_mape": round(float(np.mean(all_naive)), 4),
             "mean_seasonal_naive_mape": round(float(np.mean(all_snaive)), 4),

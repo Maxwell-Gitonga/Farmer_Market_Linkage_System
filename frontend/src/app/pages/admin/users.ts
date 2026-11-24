@@ -20,8 +20,23 @@ import { StatusBadge } from '../../shared/trend-badge';
           <select [(ngModel)]="role" (ngModelChange)="load()"><option value="">All roles</option><option value="FARMER">Farmers</option><option value="BUYER">Buyers</option><option value="ADMIN">Admins</option></select>
           <select [(ngModel)]="status" (ngModelChange)="load()"><option value="">Any status</option><option value="PENDING">Pending</option><option value="ACTIVE">Active</option><option value="SUSPENDED">Suspended</option><option value="BANNED">Banned</option></select>
           <input placeholder="Search name or phone" [(ngModel)]="q" style="width:220px" />
+          <button class="btn btn-primary" (click)="showAdd.set(!showAdd())">{{ showAdd() ? 'Close' : '+ Add administrator' }}</button>
         </div>
       </div>
+      @if (showAdd()) {
+        <form class="card pad mb add-admin" (ngSubmit)="createAdmin()" #af="ngForm">
+          <h3>New administrator</h3>
+          <p class="muted">The new administrator logs in with this email and password.</p>
+          <div class="grid">
+            <div class="field"><label for="a-name">Full name</label><input id="a-name" name="aName" [(ngModel)]="newAdmin.name" required maxlength="100" /></div>
+            <div class="field"><label for="a-email">Email</label><input id="a-email" name="aEmail" type="email" [(ngModel)]="newAdmin.email" required email /></div>
+            <div class="field"><label for="a-phone">Phone (optional)</label><input id="a-phone" name="aPhone" [(ngModel)]="newAdmin.phone" placeholder="07XX XXX XXX" /></div>
+            <div class="field"><label for="a-loc">Location (optional)</label><input id="a-loc" name="aLoc" [(ngModel)]="newAdmin.location" /></div>
+            <div class="field"><label for="a-pass">Password</label><input id="a-pass" name="aPass" type="password" [(ngModel)]="newAdmin.password" required minlength="6" autocomplete="new-password" /><span class="hint">At least 6 characters</span></div>
+          </div>
+          <div class="row mt"><button class="btn btn-primary" type="submit" [disabled]="adding() || af.invalid">{{ adding() ? 'Creating…' : 'Create administrator' }}</button></div>
+        </form>
+      }
       @if (error()) { <div class="alert error mb">{{ error() }}</div> }
       <div class="table-wrap">
         <table>
@@ -51,7 +66,8 @@ import { StatusBadge } from '../../shared/trend-badge';
       </div>
     </div>
   `,
-  styles: [`.actions { white-space: nowrap; } .actions .btn { margin-left: 4px; }`]
+  styles: [`.actions { white-space: nowrap; } .actions .btn { margin-left: 4px; }
+    .add-admin h3 { margin: 0 0 4px; } .add-admin .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 16px; margin-top: 12px; }`]
 })
 export class AdminUsersPage {
   private api = inject(ApiService);
@@ -61,6 +77,9 @@ export class AdminUsersPage {
   role: Role | '' = '';
   status: AccountStatus | '' = '';
   q = '';
+  showAdd = signal(false);
+  adding = signal(false);
+  newAdmin = { name: '', email: '', phone: '', password: '', location: '' };
 
   constructor(route: ActivatedRoute) {
     this.status = (route.snapshot.queryParamMap.get('status') as AccountStatus) || '';
@@ -74,6 +93,22 @@ export class AdminUsersPage {
   filtered() {
     const q = this.q.trim().toLowerCase();
     return q ? this.users().filter(u => (u.name + ' ' + (u.phone || '') + ' ' + (u.email || '')).toLowerCase().includes(q)) : this.users();
+  }
+
+  createAdmin() {
+    this.adding.set(true);
+    const a = this.newAdmin;
+    this.api.createAdmin({ name: a.name.trim(), email: a.email.trim(), phone: a.phone.trim() || null,
+                           password: a.password, location: a.location.trim() || null }).subscribe({
+      next: u => {
+        this.adding.set(false);
+        this.toast.success(`Administrator ${u.name} created – they can now log in with ${u.email}`);
+        this.newAdmin = { name: '', email: '', phone: '', password: '', location: '' };
+        this.showAdd.set(false);
+        this.load();
+      },
+      error: e => { this.adding.set(false); this.toast.error(errorMessage(e)); }
+    });
   }
 
   set(u: AdminUserView, status: AccountStatus) {

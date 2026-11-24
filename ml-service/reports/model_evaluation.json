@@ -1,223 +1,242 @@
 {
   "price_model": {
-    "version": "price-reg-gradient_boosting-202609231633",
+    "version": "price-reg-gradient_boosting-202611142300",
     "algorithm": "gradient_boosting",
     "selected_model": "gradient_boosting",
     "holdout_days": 180,
-    "train_samples": 76823,
-    "test_samples": 13604,
-    "final_training_samples": 92804,
+    "train_samples": 79565,
+    "test_samples": 13741,
+    "final_training_samples": 95681,
     "comparison": {
       "linear_regression": {
-        "mae": 5.858,
-        "rmse": 8.287,
-        "mape": 0.0703,
-        "r2": 0.9728,
-        "n": 13604,
+        "mae": 5.603,
+        "rmse": 7.816,
+        "mape": 0.0704,
+        "r2": 0.9769,
+        "n": 13741,
         "fit_seconds": 0.2
       },
       "random_forest": {
-        "mae": 5.668,
-        "rmse": 7.964,
-        "mape": 0.0686,
-        "r2": 0.9749,
-        "n": 13604,
-        "fit_seconds": 9.4
+        "mae": 5.427,
+        "rmse": 7.48,
+        "mape": 0.0695,
+        "r2": 0.9789,
+        "n": 13741,
+        "fit_seconds": 11.1
       },
       "gradient_boosting": {
-        "mae": 5.572,
-        "rmse": 7.885,
-        "mape": 0.0677,
-        "r2": 0.9754,
-        "n": 13604,
-        "fit_seconds": 5.0
+        "mae": 5.364,
+        "rmse": 7.415,
+        "mape": 0.0691,
+        "r2": 0.9792,
+        "n": 13741,
+        "fit_seconds": 4.9
       },
       "naive_last_price_baseline": {
-        "mae": 7.515,
-        "rmse": 11.705,
-        "mape": 0.0928,
-        "r2": 0.9457,
-        "n": 13604
+        "mae": 6.922,
+        "rmse": 11.155,
+        "mape": 0.0862,
+        "r2": 0.953,
+        "n": 13741
       }
     },
     "per_crop": {
       "Avocados": {
-        "mape": 0.0891,
-        "naive_mape": 0.1279,
-        "n": 889
+        "mape": 0.079,
+        "naive_mape": 0.105,
+        "n": 914
       },
       "Bananas": {
-        "mape": 0.0526,
-        "naive_mape": 0.0548,
-        "n": 1411
+        "mape": 0.0558,
+        "naive_mape": 0.0473,
+        "n": 1417
       },
       "Beans": {
-        "mape": 0.0325,
-        "naive_mape": 0.0392,
-        "n": 1398
+        "mape": 0.0352,
+        "naive_mape": 0.0429,
+        "n": 1422
       },
       "Cabbages": {
-        "mape": 0.113,
-        "naive_mape": 0.1185,
-        "n": 1439
+        "mape": 0.1311,
+        "naive_mape": 0.1004,
+        "n": 1451
       },
       "Green Grams": {
-        "mape": 0.0375,
-        "naive_mape": 0.0416,
-        "n": 1415
+        "mape": 0.0353,
+        "naive_mape": 0.0399,
+        "n": 1404
       },
       "Irish Potatoes": {
-        "mape": 0.071,
-        "naive_mape": 0.0951,
-        "n": 1383
+        "mape": 0.0705,
+        "naive_mape": 0.0944,
+        "n": 1436
       },
       "Maize": {
-        "mape": 0.0492,
-        "naive_mape": 0.0647,
-        "n": 1430
+        "mape": 0.0504,
+        "naive_mape": 0.0649,
+        "n": 1423
       },
       "Onions": {
-        "mape": 0.0671,
-        "naive_mape": 0.1021,
-        "n": 1425
+        "mape": 0.0632,
+        "naive_mape": 0.0958,
+        "n": 1432
       },
       "Sukuma Wiki": {
-        "mape": 0.0728,
-        "naive_mape": 0.0936,
-        "n": 1405
+        "mape": 0.0661,
+        "naive_mape": 0.0862,
+        "n": 1420
       },
       "Tomatoes": {
-        "mape": 0.0989,
-        "naive_mape": 0.2037,
-        "n": 1409
+        "mape": 0.1057,
+        "naive_mape": 0.1912,
+        "n": 1422
       }
     },
-    "improvement_over_naive_pct": 27.0,
-    "training_seconds": 24.1,
-    "records_used": 31100
+    "improvement_over_naive_pct": 19.8,
+    "training_seconds": 25.8,
+    "records_used": 31976
   },
   "demand_model": {
-    "method": "rolling-origin back-test, 13 origins, 4-week horizon",
+    "method": "rolling-origin back-test, 13 origins, 4-week horizon, WAPE",
+    "metric": "WAPE",
     "per_crop": {
       "Maize": {
-        "mape": 0.0869,
-        "naive_mape": 0.1104,
-        "seasonal_naive_mape": 0.1106,
-        "weeks": 168,
+        "mape": 0.0866,
+        "naive_mape": 0.1123,
+        "seasonal_naive_mape": 0.1068,
+        "weeks": 172,
+        "folds_used": 12,
+        "folds_skipped": 1,
         "models_selected": {
+          "holt_linear_trend": 2,
           "moving_average": 1,
-          "holt_winters_seasonal": 9,
-          "holt_linear_trend": 3
+          "holt_winters_seasonal": 9
         }
       },
       "Beans": {
-        "mape": 0.0943,
-        "naive_mape": 0.0993,
-        "seasonal_naive_mape": 0.0959,
-        "weeks": 168,
+        "mape": 0.0977,
+        "naive_mape": 0.1017,
+        "seasonal_naive_mape": 0.0985,
+        "weeks": 172,
+        "folds_used": 12,
+        "folds_skipped": 1,
         "models_selected": {
           "moving_average": 2,
-          "holt_winters_seasonal": 9,
-          "holt_linear_trend": 2
+          "holt_winters_seasonal": 10
         }
       },
       "Irish Potatoes": {
-        "mape": 0.094,
-        "naive_mape": 0.1184,
-        "seasonal_naive_mape": 0.114,
-        "weeks": 168,
+        "mape": 0.087,
+        "naive_mape": 0.1198,
+        "seasonal_naive_mape": 0.1158,
+        "weeks": 172,
+        "folds_used": 12,
+        "folds_skipped": 1,
         "models_selected": {
-          "moving_average": 1,
-          "holt_winters_seasonal": 9,
-          "holt_linear_trend": 3
+          "holt_linear_trend": 3,
+          "holt_winters_seasonal": 9
         }
       },
       "Tomatoes": {
-        "mape": 0.1222,
-        "naive_mape": 0.1294,
-        "seasonal_naive_mape": 0.1053,
-        "weeks": 168,
+        "mape": 0.1178,
+        "naive_mape": 0.1072,
+        "seasonal_naive_mape": 0.1068,
+        "weeks": 172,
+        "folds_used": 12,
+        "folds_skipped": 1,
         "models_selected": {
-          "holt_winters_seasonal": 10,
-          "holt_linear_trend": 3
+          "holt_linear_trend": 3,
+          "holt_winters_seasonal": 9
         }
       },
       "Onions": {
-        "mape": 0.0793,
-        "naive_mape": 0.0945,
-        "seasonal_naive_mape": 0.0774,
-        "weeks": 168,
+        "mape": 0.0792,
+        "naive_mape": 0.0958,
+        "seasonal_naive_mape": 0.077,
+        "weeks": 172,
+        "folds_used": 12,
+        "folds_skipped": 1,
         "models_selected": {
-          "holt_winters_seasonal": 13
+          "holt_winters_seasonal": 12
         }
       },
       "Cabbages": {
-        "mape": 0.0942,
-        "naive_mape": 0.1266,
-        "seasonal_naive_mape": 0.1102,
-        "weeks": 168,
+        "mape": 0.0918,
+        "naive_mape": 0.1242,
+        "seasonal_naive_mape": 0.1071,
+        "weeks": 172,
+        "folds_used": 12,
+        "folds_skipped": 1,
         "models_selected": {
-          "holt_winters_seasonal": 10,
-          "holt_linear_trend": 3
+          "holt_linear_trend": 2,
+          "holt_winters_seasonal": 10
         }
       },
       "Sukuma Wiki": {
-        "mape": 0.0886,
-        "naive_mape": 0.0937,
-        "seasonal_naive_mape": 0.1041,
-        "weeks": 168,
+        "mape": 0.0893,
+        "naive_mape": 0.0935,
+        "seasonal_naive_mape": 0.1036,
+        "weeks": 172,
+        "folds_used": 12,
+        "folds_skipped": 1,
         "models_selected": {
+          "holt_linear_trend": 2,
           "moving_average": 2,
-          "holt_winters_seasonal": 8,
-          "holt_linear_trend": 3
+          "holt_winters_seasonal": 8
         }
       },
       "Bananas": {
-        "mape": 0.0909,
-        "naive_mape": 0.1095,
-        "seasonal_naive_mape": 0.1006,
-        "weeks": 168,
+        "mape": 0.0903,
+        "naive_mape": 0.1054,
+        "seasonal_naive_mape": 0.1,
+        "weeks": 172,
+        "folds_used": 12,
+        "folds_skipped": 1,
         "models_selected": {
-          "moving_average": 2,
-          "holt_winters_seasonal": 8,
-          "holt_linear_trend": 3
+          "holt_linear_trend": 3,
+          "moving_average": 1,
+          "holt_winters_seasonal": 8
         }
       },
       "Avocados": {
-        "mape": 0.0958,
-        "naive_mape": 0.1296,
-        "seasonal_naive_mape": 0.0998,
-        "weeks": 168,
+        "mape": 0.0987,
+        "naive_mape": 0.1277,
+        "seasonal_naive_mape": 0.104,
+        "weeks": 172,
+        "folds_used": 12,
+        "folds_skipped": 1,
         "models_selected": {
+          "holt_linear_trend": 3,
           "moving_average": 1,
-          "holt_winters_seasonal": 9,
-          "holt_linear_trend": 3
+          "holt_winters_seasonal": 8
         }
       },
       "Green Grams": {
-        "mape": 0.0776,
-        "naive_mape": 0.0903,
-        "seasonal_naive_mape": 0.0922,
-        "weeks": 168,
+        "mape": 0.0759,
+        "naive_mape": 0.0876,
+        "seasonal_naive_mape": 0.0861,
+        "weeks": 172,
+        "folds_used": 12,
+        "folds_skipped": 1,
         "models_selected": {
-          "moving_average": 3,
-          "holt_winters_seasonal": 5,
-          "holt_linear_trend": 5
+          "holt_linear_trend": 6,
+          "moving_average": 1,
+          "holt_winters_seasonal": 5
         }
       }
     },
-    "mean_mape": 0.0924,
-    "mean_naive_mape": 0.1102,
-    "mean_seasonal_naive_mape": 0.101,
-    "improvement_over_naive_pct": 16.2
+    "mean_mape": 0.0914,
+    "mean_naive_mape": 0.1075,
+    "mean_seasonal_naive_mape": 0.1006,
+    "improvement_over_naive_pct": 15.0
   },
   "last_training": {
-    "at": "2026-09-23T16:35:07.681330+00:00",
-    "source": "bundled_simulated_dataset",
-    "price_records": 31100,
-    "transactions": 5925,
-    "seconds": 128.7,
-    "model_version": "price-reg-gradient_boosting-202609231633"
+    "at": "2026-11-14T23:02:04.346437+00:00",
+    "source": "backend_database",
+    "price_records": 31976,
+    "transactions": 5933,
+    "seconds": 121.9,
+    "model_version": "price-reg-gradient_boosting-202611142300"
   },
-  "data_source": "bundled_simulated_dataset"
+  "data_source": "backend_database"
 }

@@ -132,11 +132,13 @@ class ModelStore:
         for crop, r in pm.get("per_crop", {}).items():
             lines.append(f"| {crop} | {100 * r['mape']:.2f}% | {100 * r['naive_mape']:.2f}% | {r['n']} |")
         lines += ["", "## 2. Demand forecasting (time series)", "", f"Method: {dm.get('method', '')}", "",
-                  f"Mean MAPE: **{100 * (dm.get('mean_mape') or 0):.2f}%** vs naive "
+                  f"Mean {dm.get('metric', 'MAPE')}: **{100 * (dm.get('mean_mape') or 0):.2f}%** vs naive "
                   f"{100 * (dm.get('mean_naive_mape') or 0):.2f}% and seasonal-naive "
                   f"{100 * (dm.get('mean_seasonal_naive_mape') or 0):.2f}% "
-                  f"(improvement over naive: {dm.get('improvement_over_naive_pct')}%).", "",
-                  "| Crop | Model MAPE | Naive | Seasonal naive | Models selected across folds |", "|---|---|---|---|---|"]
+                  f"(improvement over naive: {dm.get('improvement_over_naive_pct')}%). "
+                  "WAPE = total absolute error ÷ total actual demand over each 4-week window; weeks with "
+                  "almost no recorded sales are treated as missing data.", "",
+                  f"| Crop | Model {dm.get('metric', 'MAPE')} | Naive | Seasonal naive | Models selected across folds |", "|---|---|---|---|---|"]
         for crop, r in dm.get("per_crop", {}).items():
             sel = ", ".join(f"{k}×{v}" for k, v in r.get("models_selected", {}).items())
             lines.append(f"| {crop} | {100 * r['mape']:.2f}% | {100 * r['naive_mape']:.2f}% | "

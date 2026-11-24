@@ -1,6 +1,7 @@
 package ke.ac.strathmore.fmls.service;
 
 import ke.ac.strathmore.fmls.domain.AccountStatus;
+import ke.ac.strathmore.fmls.domain.Admin;
 import ke.ac.strathmore.fmls.domain.Buyer;
 import ke.ac.strathmore.fmls.domain.Farmer;
 import ke.ac.strathmore.fmls.domain.Product;
@@ -12,6 +13,7 @@ import ke.ac.strathmore.fmls.domain.TransactionStatus;
 import ke.ac.strathmore.fmls.domain.User;
 import ke.ac.strathmore.fmls.dto.AdminOverview;
 import ke.ac.strathmore.fmls.dto.AdminUserView;
+import ke.ac.strathmore.fmls.dto.CreateAdminRequest;
 import ke.ac.strathmore.fmls.dto.CropSummary;
 import ke.ac.strathmore.fmls.dto.LogView;
 import ke.ac.strathmore.fmls.dto.MonthlySummary;
@@ -25,6 +27,7 @@ import ke.ac.strathmore.fmls.repository.PricePredictionRepository;
 import ke.ac.strathmore.fmls.repository.ProductRepository;
 import ke.ac.strathmore.fmls.repository.SystemLogRepository;
 import ke.ac.strathmore.fmls.repository.TransactionRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,11 +59,13 @@ public class AdminService {
     private final ViewMapper mapper;
     private final ActivityLogService activity;
     private final MlAdminService mlAdmin;
+    private final BCryptPasswordEncoder encoder;
 
     public AdminService(FarmerRepository farmers, BuyerRepository buyers, AdminRepository admins,
                         ProductRepository products, TransactionRepository transactions, SystemLogRepository logs,
                         PricePredictionRepository predictions, MarketDataModule market, ViewMapper mapper,
-                        ActivityLogService activity, MlAdminService mlAdmin) {
+                        ActivityLogService activity, MlAdminService mlAdmin, BCryptPasswordEncoder encoder) {
+        this.encoder = encoder;
         this.farmers = farmers;
         this.buyers = buyers;
         this.admins = admins;
@@ -105,6 +110,30 @@ public class AdminService {
     private static AdminUserView view(User u) {
         return new AdminUserView(u.getId(), u.getRole(), u.getName(), u.getPhone(), u.getEmail(), u.getLocation(),
                 u.getStatus(), u.getCreatedAt(), u.getLastLoginAt(), u instanceof Buyer b ? b.getPreferences() : null);
+    }
+
+    /** "Add administrator": an existing administrator creates another administrator account. */
+    @Transactional
+    public AdminUserView createAdmin(CreateAdminRequest req) {
+        String email = req.email().trim().toLowerCase();
+        if (admins.existsByEmailIgnoreCase(email) || farmers.existsByEmailIgnoreCase(email)
+                || buyers.existsByEmailIgnoreCase(email)) {
+            throw ApiException.conflict("This email is already registered");
+        }
+        String phone = req.phone() == null || req.phone().isBlank() ? null : UserDirectory.normalizePhone(req.phone());
+        if (phone != null && (admins.existsByPhone(phone) || farmers.existsByPhone(phone) || buyers.existsByPhone(phone))) {
+            throw ApiException.conflict("This phone number is already registered");
+        }
+        Admin a = new Admin();
+        a.setName(req.name().trim());
+        a.setEmail(email);
+        a.setPhone(phone);
+        a.setLocation(req.location() == null || req.location().isBlank() ? null : req.location().trim());
+        a.setStatus(AccountStatus.ACTIVE);
+        a.setPasswordHash(encoder.encode(req.password()));
+        a = admins.save(a);
+        activity.log("ADMIN_CREATED", "Administrator account created for " + a.getName() + " (" + email + ")");
+        return view(a);
     }
 
     /** Approve (ACTIVE), suspend, ban or reactivate a farmer/buyer account. */

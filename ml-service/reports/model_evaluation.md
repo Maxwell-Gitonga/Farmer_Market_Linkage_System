@@ -1,52 +1,52 @@
 # Model Evaluation Report
 
-Generated: 2026-09-23T16:35:07.681330+00:00  
-Training data: 31100 market-price records, 5925 transactions (bundled_simulated_dataset)
+Generated: 2026-11-14T23:02:04.346437+00:00  
+Training data: 31976 market-price records, 5933 transactions (backend_database)
 
 ## 1. Price prediction (regression)
 
-Hold-out: last 180 days (time-based split, no look-ahead). Train samples: 76823, test samples: 13604.
+Hold-out: last 180 days (time-based split, no look-ahead). Train samples: 79565, test samples: 13741.
 
 | Model | MAE (KES/kg) | RMSE | MAPE | R² |
 |---|---|---|---|---|
-| linear_regression | 5.858 | 8.287 | 7.03% | 0.9728 |
-| random_forest | 5.668 | 7.964 | 6.86% | 0.9749 |
-| gradient_boosting **(selected)** | 5.572 | 7.885 | 6.77% | 0.9754 |
-| naive_last_price_baseline | 7.515 | 11.705 | 9.28% | 0.9457 |
+| linear_regression | 5.603 | 7.816 | 7.04% | 0.9769 |
+| random_forest | 5.427 | 7.48 | 6.95% | 0.9789 |
+| gradient_boosting **(selected)** | 5.364 | 7.415 | 6.91% | 0.9792 |
+| naive_last_price_baseline | 6.922 | 11.155 | 8.62% | 0.953 |
 
-Improvement of the selected model over the naive 'last price' baseline: **27.0%** lower MAPE.
+Improvement of the selected model over the naive 'last price' baseline: **19.8%** lower MAPE.
 
 | Crop | Model MAPE | Naive MAPE | Test samples |
 |---|---|---|---|
-| Avocados | 8.91% | 12.79% | 889 |
-| Bananas | 5.26% | 5.48% | 1411 |
-| Beans | 3.25% | 3.92% | 1398 |
-| Cabbages | 11.30% | 11.85% | 1439 |
-| Green Grams | 3.75% | 4.16% | 1415 |
-| Irish Potatoes | 7.10% | 9.51% | 1383 |
-| Maize | 4.92% | 6.47% | 1430 |
-| Onions | 6.71% | 10.21% | 1425 |
-| Sukuma Wiki | 7.28% | 9.36% | 1405 |
-| Tomatoes | 9.89% | 20.37% | 1409 |
+| Avocados | 7.90% | 10.50% | 914 |
+| Bananas | 5.58% | 4.73% | 1417 |
+| Beans | 3.52% | 4.29% | 1422 |
+| Cabbages | 13.11% | 10.04% | 1451 |
+| Green Grams | 3.53% | 3.99% | 1404 |
+| Irish Potatoes | 7.05% | 9.44% | 1436 |
+| Maize | 5.04% | 6.49% | 1423 |
+| Onions | 6.32% | 9.58% | 1432 |
+| Sukuma Wiki | 6.61% | 8.62% | 1420 |
+| Tomatoes | 10.57% | 19.12% | 1422 |
 
 ## 2. Demand forecasting (time series)
 
-Method: rolling-origin back-test, 13 origins, 4-week horizon
+Method: rolling-origin back-test, 13 origins, 4-week horizon, WAPE
 
-Mean MAPE: **9.24%** vs naive 11.02% and seasonal-naive 10.10% (improvement over naive: 16.2%).
+Mean WAPE: **9.14%** vs naive 10.75% and seasonal-naive 10.06% (improvement over naive: 15.0%). WAPE = total absolute error ÷ total actual demand over each 4-week window; weeks with almost no recorded sales are treated as missing data.
 
-| Crop | Model MAPE | Naive | Seasonal naive | Models selected across folds |
+| Crop | Model WAPE | Naive | Seasonal naive | Models selected across folds |
 |---|---|---|---|---|
-| Maize | 8.69% | 11.04% | 11.06% | moving_average×1, holt_winters_seasonal×9, holt_linear_trend×3 |
-| Beans | 9.43% | 9.93% | 9.59% | moving_average×2, holt_winters_seasonal×9, holt_linear_trend×2 |
-| Irish Potatoes | 9.40% | 11.84% | 11.40% | moving_average×1, holt_winters_seasonal×9, holt_linear_trend×3 |
-| Tomatoes | 12.22% | 12.94% | 10.53% | holt_winters_seasonal×10, holt_linear_trend×3 |
-| Onions | 7.93% | 9.45% | 7.74% | holt_winters_seasonal×13 |
-| Cabbages | 9.42% | 12.66% | 11.02% | holt_winters_seasonal×10, holt_linear_trend×3 |
-| Sukuma Wiki | 8.86% | 9.37% | 10.41% | moving_average×2, holt_winters_seasonal×8, holt_linear_trend×3 |
-| Bananas | 9.09% | 10.95% | 10.06% | moving_average×2, holt_winters_seasonal×8, holt_linear_trend×3 |
-| Avocados | 9.58% | 12.96% | 9.98% | moving_average×1, holt_winters_seasonal×9, holt_linear_trend×3 |
-| Green Grams | 7.76% | 9.03% | 9.22% | moving_average×3, holt_winters_seasonal×5, holt_linear_trend×5 |
+| Maize | 8.66% | 11.23% | 10.68% | holt_linear_trend×2, moving_average×1, holt_winters_seasonal×9 |
+| Beans | 9.77% | 10.17% | 9.85% | moving_average×2, holt_winters_seasonal×10 |
+| Irish Potatoes | 8.70% | 11.98% | 11.58% | holt_linear_trend×3, holt_winters_seasonal×9 |
+| Tomatoes | 11.78% | 10.72% | 10.68% | holt_linear_trend×3, holt_winters_seasonal×9 |
+| Onions | 7.92% | 9.58% | 7.70% | holt_winters_seasonal×12 |
+| Cabbages | 9.18% | 12.42% | 10.71% | holt_linear_trend×2, holt_winters_seasonal×10 |
+| Sukuma Wiki | 8.93% | 9.35% | 10.36% | holt_linear_trend×2, moving_average×2, holt_winters_seasonal×8 |
+| Bananas | 9.03% | 10.54% | 10.00% | holt_linear_trend×3, moving_average×1, holt_winters_seasonal×8 |
+| Avocados | 9.87% | 12.77% | 10.40% | holt_linear_trend×3, moving_average×1, holt_winters_seasonal×8 |
+| Green Grams | 7.59% | 8.76% | 8.61% | holt_linear_trend×6, moving_average×1, holt_winters_seasonal×5 |
 
 ## 3. Recommendation engine
 

@@ -6,6 +6,7 @@ import ke.ac.strathmore.fmls.module.DemandForecastModule;
 import ke.ac.strathmore.fmls.module.MarketDataModule;
 import ke.ac.strathmore.fmls.module.MlClient;
 import ke.ac.strathmore.fmls.module.MlUnavailableException;
+import ke.ac.strathmore.fmls.module.SalesFeedModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ke.ac.strathmore.fmls.config.AppProperties;
@@ -34,13 +35,15 @@ public class MlAdminService {
     private final DemandForecastModule demand;
     private final ActivityLogService activity;
     private final AppProperties props;
+    private final SalesFeedModule salesFeed;
     private final ObjectMapper mapper = new ObjectMapper();
     private final AtomicBoolean running = new AtomicBoolean(false);
     private volatile Map<String, Object> lastResult = new LinkedHashMap<>();
 
-    public MlAdminService(MlClient ml, MarketDataModule market, DemandForecastModule demand, ActivityLogService activity,
+    public MlAdminService(MlClient ml, MarketDataModule market, DemandForecastModule demand, ActivityLogService activity, SalesFeedModule salesFeed,
                           AppProperties props) {
         this.props = props;
+        this.salesFeed = salesFeed;
         this.ml = ml;
         this.market = market;
         this.demand = demand;
@@ -87,6 +90,7 @@ public class MlAdminService {
         long t0 = System.currentTimeMillis();
         Map<String, Object> result = new LinkedHashMap<>();
         try {
+            salesFeed.fillGaps();   // make sure recent weeks are not empty before training
             Map<String, Object> body = new HashMap<>();
             body.put("market_prices", market.trainingPayload());
             body.put("transactions", demand.trainingPayload());
